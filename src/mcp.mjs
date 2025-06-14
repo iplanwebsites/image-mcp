@@ -363,6 +363,40 @@ class AIImageMCPServer {
       );
     }
 
+    if (!output_dir) {
+      throw new McpError(
+        ErrorCode.InvalidParams,
+        "Output directory is required for image generation"
+      );
+    }
+
+    // Check if output_dir is a relative path (starts with . or doesn't start with /)
+    if (output_dir.startsWith('.') || !output_dir.startsWith('/')) {
+      throw new McpError(
+        ErrorCode.InvalidParams,
+        "Output directory must be an absolute path, not a relative path"
+      );
+    }
+
+    // Test if output directory is writable
+    try {
+      const fs = await import("fs/promises");
+      const path = await import("path");
+      
+      // Create directory if it doesn't exist
+      await fs.mkdir(output_dir, { recursive: true });
+      
+      // Test write permissions by creating a temporary file
+      const testFile = path.join(output_dir, `test-write-${Date.now()}.tmp`);
+      await fs.writeFile(testFile, "test", "utf8");
+      await fs.unlink(testFile);
+    } catch (error) {
+      throw new McpError(
+        ErrorCode.InvalidParams,
+        `Output directory is not writable: ${error.message}`
+      );
+    }
+
     try {
       const result = await this.executeAIImageCommand({
         prompt,
