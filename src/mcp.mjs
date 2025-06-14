@@ -166,16 +166,28 @@ class AIImageMCPServer {
 
       let stdout = "";
       let stderr = "";
+      let startTime = Date.now();
+
+      // Send progress updates every second
+      const progressInterval = setInterval(() => {
+        const elapsed = Math.floor((Date.now() - startTime) / 1000);
+        console.error(`Progress: Image generation in progress... (${elapsed}s elapsed)`);
+      }, 1000);
 
       child.stdout.on("data", (data) => {
         stdout += data.toString();
+        // Reset progress when we receive data
+        console.error("Progress: Received output from image generation process");
       });
 
       child.stderr.on("data", (data) => {
         stderr += data.toString();
+        // Reset progress when we receive data
+        console.error("Progress: Received stderr from image generation process");
       });
 
       child.on("close", (code) => {
+        clearInterval(progressInterval);
         if (code === 0) {
           resolve({
             command,
@@ -193,17 +205,20 @@ class AIImageMCPServer {
       });
 
       child.on("error", (error) => {
+        clearInterval(progressInterval);
         reject(new Error(`Failed to spawn process: ${error.message}`));
       });
 
-      // Set a timeout to prevent hanging
+      // Increase timeout and clear interval on completion
       const timeout = setTimeout(() => {
+        clearInterval(progressInterval);
         child.kill("SIGTERM");
-        reject(new Error("Command timed out after 60 seconds"));
-      }, 60000);
+        reject(new Error("Command timed out after 5 minutes"));
+      }, 300000); // 5 minutes instead of 60 seconds
 
       child.on("close", () => {
         clearTimeout(timeout);
+        clearInterval(progressInterval);
       });
     });
   }

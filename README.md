@@ -32,7 +32,8 @@ Add the following to your Claude Desktop configuration file:
       "env": {
         "OPENAI_API_KEY": "your-openai-api-key",
         "REPLICATE_API_TOKEN": "your-replicate-api-token"
-      }
+      },
+      "resetTimeoutOnProgress": true
     }
   }
 }
