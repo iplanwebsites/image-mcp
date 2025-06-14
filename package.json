@@ -15,7 +15,7 @@
   ],
   "scripts": {
     "start": "node src/mcp.mjs",
-    "dev:inspector": "npx @modelcontextprotocol/inspector node src/mcp.mjs"
+    "dev": "npx @modelcontextprotocol/inspector node src/mcp.mjs"
   },
   "keywords": [
     "mcp",
