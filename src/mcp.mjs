@@ -174,11 +174,160 @@ class AIImageMCPServer {
   }
 
   async handlePizzaTest() {
+    const timestamp = new Date().toISOString();
+    const testResults = [];
+    const fs = await import("fs/promises");
+    const path = await import("path");
+    const url = await import("url");
+
+    // Get various path information
+    const currentDir = process.cwd();
+    const scriptPath = url.fileURLToPath(import.meta.url);
+    const scriptDir = path.dirname(scriptPath);
+    const repoRoot = path.resolve(scriptDir, "..");
+
+    // Test different writable locations
+    const testPaths = [
+      process.cwd(),
+      "/tmp/fs-test-write.txt",
+      "./fs-test-write.txt",
+      `${currentDir}/fs-test-write.txt`,
+      `/var/tmp/fs-test-write.txt`,
+      `${scriptDir}/fs-test-write.txt`,
+      `${repoRoot}/fs-test-write.txt`,
+      `${repoRoot}/output/fs-test-write.txt`,
+      `${repoRoot}/temp/fs-test-write.txt`,
+      `${repoRoot}/images/fs-test-write.txt`,
+      `${repoRoot}/generated/fs-test-write.txt`,
+      `${currentDir}/output/fs-test-write.txt`,
+      `${currentDir}/temp/fs-test-write.txt`,
+      `${currentDir}/images/fs-test-write.txt`,
+      "/Users/felix/web/git/repo-md/klepto-repo/articles/fs-test-write.txt",
+      "/Users/felix/web/git/repo-md/klepto-repo/articles/images/fs-test-write.txt",
+      "/Users/felix/web/git/repo-md/klepto-repo/articles/generated/fs-test-write.txt",
+      "/Users/felix/web/git/repo-md/klepto-repo/articles/assets/fs-test-write.txt",
+    ];
+
+    // If HOME is available, add it
+    if (process.env.HOME) {
+      testPaths.push(`${process.env.HOME}/fs-test-write.txt`);
+      testPaths.push(`${process.env.HOME}/ai-images/fs-test-write.txt`);
+    }
+
+    for (const testPath of testPaths) {
+      try {
+        // First try to create directory if it doesn't exist
+        const dir = path.dirname(testPath);
+        try {
+          await fs.mkdir(dir, { recursive: true });
+        } catch (mkdirError) {
+          // Ignore mkdir errors, might already exist or not have permission
+        }
+
+        // Try to write a test file
+        const testContent = `Test write at ${timestamp}\nPath: ${testPath}\nPID: ${
+          process.pid
+        }\nCWD: ${process.cwd()}`;
+
+        await fs.writeFile(testPath, testContent, "utf8");
+
+        // Try to read it back
+        await fs.readFile(testPath, "utf8");
+
+        // Clean up
+        await fs.unlink(testPath);
+
+        testResults.push(
+          `✅ SUCCESS: ${testPath} - Write/Read/Delete successful`
+        );
+      } catch (error) {
+        testResults.push(
+          `❌ FAILED: ${testPath} - ${error.code}: ${error.message}`
+        );
+      }
+    }
+
+    // Test directory permissions
+    const dirTests = [];
+    const dirsToTest = [
+      currentDir,
+      scriptDir,
+      repoRoot,
+      "/tmp",
+      "/var/tmp",
+      process.env.HOME,
+      "/Users/felix/web/git/repo-md/klepto-repo/articles",
+    ].filter(Boolean);
+
+    for (const dir of dirsToTest) {
+      try {
+        await fs.access(dir, fs.constants.F_OK);
+        const stats = await fs.stat(dir);
+
+        try {
+          await fs.access(dir, fs.constants.W_OK);
+          dirTests.push(
+            `📁 ${dir}: EXISTS, WRITABLE (mode: ${stats.mode.toString(8)})`
+          );
+        } catch {
+          dirTests.push(
+            `📁 ${dir}: EXISTS, READ-ONLY (mode: ${stats.mode.toString(8)})`
+          );
+        }
+      } catch (error) {
+        dirTests.push(`📁 ${dir}: NOT ACCESSIBLE - ${error.code}`);
+      }
+    }
+
+    // Test process info
+    const processInfo = [
+      `Process ID: ${process.pid}`,
+      `Current Working Directory: ${currentDir}`,
+      `Script Path: ${scriptPath}`,
+      `Script Directory: ${scriptDir}`,
+      `Repo Root (guessed): ${repoRoot}`,
+      `Node Version: ${process.version}`,
+      `Platform: ${process.platform}`,
+      `Architecture: ${process.arch}`,
+      `User ID: ${process.getuid ? process.getuid() : "N/A"}`,
+      `Group ID: ${process.getgid ? process.getgid() : "N/A"}`,
+      `Environment TMPDIR: ${process.env.TMPDIR || "Not set"}`,
+      `Environment HOME: ${process.env.HOME || "Not set"}`,
+      `Process argv[0]: ${process.argv[0]}`,
+      `Process argv[1]: ${process.argv[1]}`,
+    ];
+
+    // Create a detailed log and also write it to a file
+    const fullReport = [
+      `🍕 Pizza Test - Enhanced Filesystem Write Test`,
+      `Timestamp: ${timestamp}`,
+      ``,
+      `📁 Write Test Results:`,
+      ...testResults,
+      ``,
+      `📂 Directory Permission Tests:`,
+      ...dirTests,
+      ``,
+      `🔍 Process Information:`,
+      ...processInfo,
+      ``,
+      `🔑 Secret Password: kangaroo`,
+    ].join("\n");
+
+    // Try to write the full report to a log file
+    try {
+      const logPath = `/tmp/mcp-server-test-${Date.now()}.log`;
+      await fs.writeFile(logPath, fullReport, "utf8");
+      console.error(`📝 Full report written to: ${logPath}`);
+    } catch (logError) {
+      console.error(`❌ Could not write log file: ${logError.message}`);
+    }
+
     return {
       content: [
         {
           type: "text",
-          text: "kangaroo",
+          text: fullReport,
         },
       ],
     };
