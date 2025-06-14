@@ -11,6 +11,8 @@ import {
 import { spawn } from "child_process";
 import { promisify } from "util";
 
+const PROGRESS_UPDATE_INTERVAL = 3000; // 3 seconds
+
 class AIImageMCPServer {
   constructor() {
     this.server = new Server(
@@ -168,11 +170,11 @@ class AIImageMCPServer {
       let stderr = "";
       let startTime = Date.now();
 
-      // Send progress updates every second
+      // Send progress updates every 3 seconds
       const progressInterval = setInterval(() => {
         const elapsed = Math.floor((Date.now() - startTime) / 1000);
         console.error(`Progress: Image generation in progress... (${elapsed}s elapsed)`);
-      }, 1000);
+      }, PROGRESS_UPDATE_INTERVAL);
 
       child.stdout.on("data", (data) => {
         stdout += data.toString();
