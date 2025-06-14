@@ -1,0 +1,47 @@
+{
+  "name": "image-mcp",
+  "version": "0.0.7",
+  "description": "An MCP server for AI image generation and handling",
+  "main": "src/mcp.mjs",
+  "bin": {
+    "image-mcp": "dist/mcp.mjs"
+  },
+  "type": "module",
+  "files": [
+    "src/mcp.mjs",
+    "dist/mcp.mjs",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "start": "node src/mcp.mjs",
+    "dev:inspector": "npx @modelcontextprotocol/inspector node src/mcp.mjs"
+  },
+  "keywords": [
+    "mcp",
+    "mcp-server",
+    "model-context-protocol",
+    "image-generation",
+    "ai-image",
+    "openai",
+    "replicate",
+    "ai",
+    "claude"
+  ],
+  "author": "",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/iplanwebsites/image-mcp.git"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.12.3",
+    "ai-image": "^0.0.6"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}
