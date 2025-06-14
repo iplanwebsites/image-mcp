@@ -1,10 +1,10 @@
 {
   "name": "image-mcp",
-  "version": "0.0.7",
+  "version": "0.0.9",
   "description": "An MCP server for AI image generation and handling",
   "main": "src/mcp.mjs",
   "bin": {
-    "image-mcp": "dist/mcp.mjs"
+    "image-mcp": "src/mcp.mjs"
   },
   "type": "module",
   "files": [
@@ -15,7 +15,9 @@
   ],
   "scripts": {
     "start": "node src/mcp.mjs",
-    "dev": "npx @modelcontextprotocol/inspector node src/mcp.mjs"
+    "dev": "npx @modelcontextprotocol/inspector node src/mcp.mjs",
+    "inspect:dist": "npx @modelcontextprotocol/inspector node src/mcp.mjs",
+    "inspect:prod": "npx @modelcontextprotocol/inspector npx --yes image-mcp"
   },
   "keywords": [
     "mcp",
@@ -34,6 +36,7 @@
     "type": "git",
     "url": "git+https://github.com/iplanwebsites/image-mcp.git"
   },
+  "homepage": "https://github.com/iplanwebsites/image-mcp",
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.12.3",
     "ai-image": "^0.0.6"

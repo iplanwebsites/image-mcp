@@ -58,9 +58,74 @@ class AIImageMCPServer {
                   type: "string",
                   description: "Output file path (optional)",
                 },
-                style: {
+              },
+              required: ["prompt"],
+            },
+          },
+          {
+            name: "square_image",
+            description:
+              "Generate a square AI image (1024x1024) - shortcut for generate_ai_image",
+            inputSchema: {
+              type: "object",
+              properties: {
+                prompt: {
                   type: "string",
-                  description: "Image style (optional)",
+                  description: "The text prompt for image generation",
+                },
+                model: {
+                  type: "string",
+                  description: "AI model to use for generation (optional)",
+                },
+                output: {
+                  type: "string",
+                  description: "Output file path (optional)",
+                },
+              },
+              required: ["prompt"],
+            },
+          },
+          {
+            name: "landscape_image",
+            description:
+              "Generate a landscape AI image (1536x1024) - works great for cover images - shortcut for generate_ai_image",
+            inputSchema: {
+              type: "object",
+              properties: {
+                prompt: {
+                  type: "string",
+                  description: "The text prompt for image generation",
+                },
+                model: {
+                  type: "string",
+                  description: "AI model to use for generation (optional)",
+                },
+                output: {
+                  type: "string",
+                  description: "Output file path (optional)",
+                },
+              },
+              required: ["prompt"],
+            },
+          },
+          {
+            name: "portrait_image",
+            description:
+              "Generate a portrait AI image (1024x1536) - shortcut for generate_ai_image",
+            inputSchema: {
+              type: "object",
+              properties: {
+                prompt: {
+                  type: "string",
+                  description: "The text prompt for image generation",
+                },
+                model: {
+                  type: "string",
+                  description: "AI model to use for generation (optional)",
+                },
+                output: {
+                  type: "string",
+                  description: "Output file path (optional)",
                 },
               },
               required: ["prompt"],
@@ -82,6 +147,21 @@ class AIImageMCPServer {
     this.server.setRequestHandler(CallToolRequestSchema, async (request) => {
       if (request.params.name === "generate_ai_image") {
         return await this.handleGenerateImage(request.params.arguments);
+      } else if (request.params.name === "square_image") {
+        return await this.handleGenerateImage({
+          ...request.params.arguments,
+          size: "1024x1024",
+        });
+      } else if (request.params.name === "landscape_image") {
+        return await this.handleGenerateImage({
+          ...request.params.arguments,
+          size: "1536x1024",
+        });
+      } else if (request.params.name === "portrait_image") {
+        return await this.handleGenerateImage({
+          ...request.params.arguments,
+          size: "1024x1536",
+        });
       } else if (request.params.name === "pizza-test") {
         return await this.handlePizzaTest(request.params.arguments);
       } else {
@@ -105,7 +185,7 @@ class AIImageMCPServer {
   }
 
   async handleGenerateImage(args) {
-    const { prompt, size = "1024x1024", model, output, style } = args;
+    const { prompt, size = "1024x1024", model, output } = args;
 
     if (!prompt) {
       throw new McpError(
@@ -120,7 +200,6 @@ class AIImageMCPServer {
         size,
         model,
         output,
-        style,
       });
 
       return {
@@ -143,7 +222,7 @@ class AIImageMCPServer {
     }
   }
 
-  async executeAIImageCommand({ prompt, size, model, output, style }) {
+  async executeAIImageCommand({ prompt, size, model, output }) {
     return new Promise((resolve, reject) => {
       const args = ["ai-image", "generate", "--prompt", prompt, "--size", size];
 
@@ -153,9 +232,6 @@ class AIImageMCPServer {
       }
       if (output) {
         args.push("--output", output);
-      }
-      if (style) {
-        args.push("--style", style);
       }
 
       const command = `npx ${args.join(" ")}`;
@@ -173,19 +249,25 @@ class AIImageMCPServer {
       // Send progress updates every 3 seconds
       const progressInterval = setInterval(() => {
         const elapsed = Math.floor((Date.now() - startTime) / 1000);
-        console.error(`Progress: Image generation in progress... (${elapsed}s elapsed)`);
+        console.error(
+          `Progress: Image generation in progress... (${elapsed}s elapsed)`
+        );
       }, PROGRESS_UPDATE_INTERVAL);
 
       child.stdout.on("data", (data) => {
         stdout += data.toString();
         // Reset progress when we receive data
-        console.error("Progress: Received output from image generation process");
+        console.error(
+          "Progress: Received output from image generation process"
+        );
       });
 
       child.stderr.on("data", (data) => {
         stderr += data.toString();
         // Reset progress when we receive data
-        console.error("Progress: Received stderr from image generation process");
+        console.error(
+          "Progress: Received stderr from image generation process"
+        );
       });
 
       child.on("close", (code) => {
