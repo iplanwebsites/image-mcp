@@ -31,7 +31,8 @@ Add the following to your Claude Desktop configuration file:
       "args": ["image-mcp@latest"],
       "env": {
         "OPENAI_API_KEY": "your-openai-api-key",
-        "REPLICATE_API_TOKEN": "your-replicate-api-token"
+        "REPLICATE_API_TOKEN": "your-replicate-api-token",
+        "MCP_TIMEOUT": 1200000
       },
       "resetTimeoutOnProgress": true
     }
@@ -43,7 +44,7 @@ Add the following to your Claude Desktop configuration file:
 
 The server requires API keys for the underlying image generation services:
 
-- `OPENAI_API_KEY`: Your OpenAI API key for DALL-E models
+- `OPENAI_API_KEY`: Your OpenAI API key for GPT-based models (we won't be supporting Dall-e models as they'll likely be dropped soon)
 - `REPLICATE_API_TOKEN`: Your Replicate API token for other AI models
 
 ## Usage
@@ -91,13 +92,13 @@ npm start
 
 ### Improvements
 
-- [ ] **Better guides**: Add more detailed setup guides with troubleshooting steps
-- [ ] **Fix timeout issue**: Handle requests that take longer than 60 seconds
+- [ ] **Better guides**: Add more detailed setup guides with troubleshooting steps, an Add to cursor button, etc
+- [x] **Fix timeout issue**: Handle requests that take longer than 60 seconds
 - [ ] **Use ai-image library directly**: Replace subprocess CLI calls with direct library imports
 - [ ] **Return file paths**: Return created image file paths in response
 - [ ] **Local inference support**: Add support for local models like Flux
 - [ ] **Image optimization**: Add lightweight image resizing and optimization options
-- [ ] **Image captioning**: Add captioning model for basic use cases (useful for models without vision)
+- [ ] **Image captioning tool**: Add captioning model for basic use cases (useful for models without vision)
 
 ## License
 
