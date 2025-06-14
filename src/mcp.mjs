@@ -234,6 +234,13 @@ class AIImageMCPServer {
         args.push("--output", output);
       }
 
+      // Pass API key if available in environment
+      const apiKey =
+        process.env.OPENAI_API_KEY || process.env.REPLICATE_API_TOKEN; //TODO: use the key that matches the model/provider
+      if (apiKey) {
+        args.push("--api-key", apiKey);
+      }
+
       const command = `npx ${args.join(" ")}`;
       console.error(`Executing: ${command}`); // Log to stderr so it doesn't interfere with MCP protocol
 
