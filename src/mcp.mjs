@@ -65,7 +65,8 @@ class AIImageMCPServer {
                 },
                 quality: {
                   type: "string",
-                  description: "Image quality (low, medium, high, auto) - OpenAI only",
+                  description:
+                    "Image quality (low, medium, high, auto) - OpenAI only",
                   default: "high",
                 },
               },
@@ -98,7 +99,8 @@ class AIImageMCPServer {
                 },
                 quality: {
                   type: "string",
-                  description: "Image quality (low, medium, high, auto) - OpenAI only",
+                  description:
+                    "Image quality (low, medium, high, auto) - OpenAI only",
                   default: "high",
                 },
               },
@@ -122,7 +124,7 @@ class AIImageMCPServer {
                 },
                 output: {
                   type: "string",
-                  description: "Output file path (optional)",
+                  description: "Output filename (optional), must end in .png",
                 },
                 output_dir: {
                   type: "string",
@@ -131,7 +133,8 @@ class AIImageMCPServer {
                 },
                 quality: {
                   type: "string",
-                  description: "Image quality (low, medium, high, auto) - OpenAI only",
+                  description:
+                    "Image quality (low, medium, high, auto) - OpenAI only",
                   default: "high",
                 },
               },
@@ -164,7 +167,8 @@ class AIImageMCPServer {
                 },
                 quality: {
                   type: "string",
-                  description: "Image quality (low, medium, high, auto) - OpenAI only",
+                  description:
+                    "Image quality (low, medium, high, auto) - OpenAI only",
                   default: "high",
                 },
               },
@@ -374,7 +378,14 @@ class AIImageMCPServer {
   }
 
   async handleGenerateImage(args) {
-    const { prompt, size = "1024x1024", model, output, output_dir, quality = "high" } = args;
+    const {
+      prompt,
+      size = "1024x1024",
+      model,
+      output,
+      output_dir,
+      quality = "high",
+    } = args;
 
     if (!prompt) {
       throw new McpError(
@@ -391,7 +402,7 @@ class AIImageMCPServer {
     }
 
     // Check if output_dir is a relative path (starts with . or doesn't start with /)
-    if (output_dir.startsWith('.') || !output_dir.startsWith('/')) {
+    if (output_dir.startsWith(".") || !output_dir.startsWith("/")) {
       throw new McpError(
         ErrorCode.InvalidParams,
         "Output directory must be an absolute path, not a relative path"
@@ -402,10 +413,10 @@ class AIImageMCPServer {
     try {
       const fs = await import("fs/promises");
       const path = await import("path");
-      
+
       // Create directory if it doesn't exist
       await fs.mkdir(output_dir, { recursive: true });
-      
+
       // Test write permissions by creating a temporary file
       const testFile = path.join(output_dir, `test-write-${Date.now()}.tmp`);
       await fs.writeFile(testFile, "test", "utf8");
@@ -447,7 +458,14 @@ class AIImageMCPServer {
     }
   }
 
-  async executeAIImageCommand({ prompt, size, model, output, output_dir, quality }) {
+  async executeAIImageCommand({
+    prompt,
+    size,
+    model,
+    output,
+    output_dir,
+    quality,
+  }) {
     return new Promise((resolve, reject) => {
       const args = ["ai-image", "generate", "--prompt", prompt, "--size", size];
 
