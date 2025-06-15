@@ -63,6 +63,11 @@ class AIImageMCPServer {
                   description:
                     "Absolute path direcotry where to save the image (use current folder root by default)",
                 },
+                quality: {
+                  type: "string",
+                  description: "Image quality (low, medium, high, auto) - OpenAI only",
+                  default: "high",
+                },
               },
               required: ["prompt", "output_dir"],
             },
@@ -90,6 +95,11 @@ class AIImageMCPServer {
                   type: "string",
                   description:
                     "Absolute path direcotry where to save the image (use current folder root by default)",
+                },
+                quality: {
+                  type: "string",
+                  description: "Image quality (low, medium, high, auto) - OpenAI only",
+                  default: "high",
                 },
               },
               required: ["prompt", "output_dir"],
@@ -119,6 +129,11 @@ class AIImageMCPServer {
                   description:
                     "Absolute path direcotry where to save the image (use current folder, or one that make sense for assets)",
                 },
+                quality: {
+                  type: "string",
+                  description: "Image quality (low, medium, high, auto) - OpenAI only",
+                  default: "high",
+                },
               },
               required: ["prompt", "output_dir"],
             },
@@ -146,6 +161,11 @@ class AIImageMCPServer {
                   type: "string",
                   description:
                     "Absolute path direcotry where to save the image (use current folder root by default)",
+                },
+                quality: {
+                  type: "string",
+                  description: "Image quality (low, medium, high, auto) - OpenAI only",
+                  default: "high",
                 },
               },
               required: ["prompt", "output_dir"],
@@ -354,7 +374,7 @@ class AIImageMCPServer {
   }
 
   async handleGenerateImage(args) {
-    const { prompt, size = "1024x1024", model, output, output_dir } = args;
+    const { prompt, size = "1024x1024", model, output, output_dir, quality = "high" } = args;
 
     if (!prompt) {
       throw new McpError(
@@ -404,6 +424,7 @@ class AIImageMCPServer {
         model,
         output,
         output_dir,
+        quality,
       });
 
       return {
@@ -426,7 +447,7 @@ class AIImageMCPServer {
     }
   }
 
-  async executeAIImageCommand({ prompt, size, model, output, output_dir }) {
+  async executeAIImageCommand({ prompt, size, model, output, output_dir, quality }) {
     return new Promise((resolve, reject) => {
       const args = ["ai-image", "generate", "--prompt", prompt, "--size", size];
 
@@ -439,6 +460,9 @@ class AIImageMCPServer {
       }
       if (output_dir) {
         args.push("--output-dir", output_dir);
+      }
+      if (quality) {
+        args.push("--quality", quality);
       }
 
       // Pass API key if available in environment
