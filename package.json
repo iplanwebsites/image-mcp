@@ -39,7 +39,7 @@
   "homepage": "https://github.com/iplanwebsites/image-mcp",
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.12.3",
-    "ai-image": "^0.0.6"
+    "ai-image": "^0.0.8"
   },
   "engines": {
     "node": ">=18.0.0"
