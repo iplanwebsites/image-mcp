@@ -6,7 +6,7 @@ An MCP (Model Context Protocol) server that provides AI image generation capabil
 
 - **generate_ai_image**: Generate AI images with customizable prompts, sizes, models, and styles
 - **square_image**: Generate square images (1024x1024) - shortcut command
-- **landscape_image**: Generate landscape images (1536x1024) - shortcut command  
+- **landscape_image**: Generate landscape images (1536x1024) - shortcut command
 - **portrait_image**: Generate portrait images (1024x1536) - shortcut command
 - Built on the ai-image module for seamless integration with OpenAI and Replicate APIs
 - Simple setup and configuration
@@ -111,7 +111,7 @@ npm start
 
 - [ ] **Better guides**: Add more detailed setup guides with troubleshooting steps, an Add to cursor button, etc
 
-- [ ] **Use ai-image library directly**: Replace subprocess CLI calls with direct library imports
+- [x] **Use ai-image library directly**: Replace subprocess CLI calls with direct library imports
 - [ ] **Return file paths**: Return created image file paths in response
 - [ ] **Local inference support**: Add support for local models like Flux
 - [ ] **Image optimization**: Add lightweight image resizing and optimization options

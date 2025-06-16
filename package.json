@@ -1,6 +1,6 @@
 {
   "name": "image-mcp",
-  "version": "0.0.12",
+  "version": "0.0.13",
   "description": "An MCP server for AI image generation and handling",
   "main": "src/mcp.mjs",
   "bin": {

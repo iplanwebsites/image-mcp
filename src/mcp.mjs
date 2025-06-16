@@ -9,7 +9,7 @@ import {
   McpError,
 } from "@modelcontextprotocol/sdk/types.js";
 import { spawn } from "child_process";
-import { promisify } from "util";
+import { ImageGenerator } from "ai-image";
 
 const PROGRESS_UPDATE_INTERVAL = 3000; // 3 seconds
 
@@ -36,7 +36,7 @@ class AIImageMCPServer {
         tools: [
           {
             name: "generate_ai_image",
-            description: "Generate AI images using the ai-image CLI tool",
+            description: "Generate AI images using the ai-image npm module",
             inputSchema: {
               type: "object",
               properties: {
@@ -68,6 +68,12 @@ class AIImageMCPServer {
                   description:
                     "Image quality (low, medium, high, auto) - OpenAI only",
                   default: "high",
+                },
+                uselibincli: {
+                  type: "boolean",
+                  description:
+                    "Use library imports instead of CLI (default: false)",
+                  default: false,
                 },
               },
               required: ["prompt", "output_dir"],
@@ -103,6 +109,11 @@ class AIImageMCPServer {
                     "Image quality (low, medium, high, auto) - OpenAI only",
                   default: "high",
                 },
+                uselibincli: {
+                  type: "boolean",
+                  description: "Use library imports instead of CLI (default: false)",
+                  default: false,
+                },
               },
               required: ["prompt", "output_dir"],
             },
@@ -137,6 +148,11 @@ class AIImageMCPServer {
                     "Image quality (low, medium, high, auto) - OpenAI only",
                   default: "high",
                 },
+                uselibincli: {
+                  type: "boolean",
+                  description: "Use library imports instead of CLI (default: false)",
+                  default: false,
+                },
               },
               required: ["prompt", "output_dir"],
             },
@@ -170,6 +186,11 @@ class AIImageMCPServer {
                   description:
                     "Image quality (low, medium, high, auto) - OpenAI only",
                   default: "high",
+                },
+                uselibincli: {
+                  type: "boolean",
+                  description: "Use library imports instead of CLI (default: false)",
+                  default: false,
                 },
               },
               required: ["prompt", "output_dir"],
@@ -377,7 +398,7 @@ class AIImageMCPServer {
     };
   }
 
-  async handleGenerateImage(args) {
+  async handleGenerateImageWithImports(args) {
     const {
       prompt,
       size = "1024x1024",
@@ -386,6 +407,69 @@ class AIImageMCPServer {
       output_dir,
       quality = "high",
     } = args;
+
+    try {
+      // Determine provider based on model or environment variables
+      let provider = 'openai'; // default
+      if (model && model.includes('stability-ai/sdxl')) {
+        provider = 'replicate';
+      } else if (process.env.REPLICATE_API_TOKEN && !process.env.OPENAI_API_KEY) {
+        provider = 'replicate';
+      }
+
+      // Create ImageGenerator instance - let it handle validation
+      const generator = new ImageGenerator({
+        provider,
+        outputDir: output_dir,
+        outputFilename: output
+      });
+
+      // Parse size for the library
+      const [width, height] = size.split('x').map(s => parseInt(s));
+      const libSize = width === height ? '1024x1024' : 
+                     width > height ? '1536x1024' : '1024x1536';
+
+      // Generate image using the library - let it handle all validation
+      const savedPaths = await generator.generate({
+        prompt,
+        model,
+        size: libSize,
+        quality,
+        n: 1
+      });
+
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Image generation completed successfully using library imports!\n\nGenerated image saved to: ${savedPaths[0]}\n\nProvider: ${provider}\nSize: ${libSize}\nQuality: ${quality}`,
+          },
+        ],
+      };
+    } catch (error) {
+      // Convert library errors to MCP errors
+      throw new McpError(
+        ErrorCode.InternalError,
+        `Failed to generate image with library: ${error.message}`
+      );
+    }
+  }
+
+  async handleGenerateImage(args) {
+    const {
+      prompt,
+      size = "1024x1024",
+      model,
+      output,
+      output_dir,
+      quality = "high",
+      uselibincli = false,
+    } = args;
+
+    // Switch between library imports and CLI based on uselibincli parameter
+    if (!uselibincli) {
+      return await this.handleGenerateImageWithImports(args);
+    }
 
     if (!prompt) {
       throw new McpError(
